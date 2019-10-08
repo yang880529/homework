@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body {
+	overflow: hidden
+}
+#info {
+  position: absolute;
+  top: 5%;
+  width: 100%;
+  padding: 10px;
+  text-align: center;
+  color: #ffff00;
+}
+body {
+  overflow: hidden;
+}
+</style>
+</head>
+
+<body>
+<div id="info">
+  <br>
+  <br>
+  <button id="toggle1" style="width:20%">Toggle Turn</button>
+  <button id="toggle2" style="width:20%">Analog</button>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/107/three.min.js"></script>
+<script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+<script type="text/javascript"></script>
+<script>
+javascript:(function(){var script=document.createElement('script');script.onload=function(){var stats=new Stats();document.body.appendChild(stats.dom);requestAnimationFrame(function loop(){stats.update();requestAnimationFrame(loop)});};script.src='https://mrdoob.github.io/stats.js/build/stats.min.js';document.head.appendChild(script);})()
+
+var renderer, scene, camera;
+var controls,circle1,circle2,circle3;
+var angle=0,open=0,a=0;
+var ushape,angle2= Math.PI*2,angle3=0;
+var mesh,turn = false;
+var moveornot=false;
+var clock = new THREE.Clock();
+init();
+animate();
+
+$("#toggle1").click(function () {
+  turn = !turn;
+});
+$("#toggle2").click(function () {
+  open+=1;
+  if(open==0)$("#toggle2").text("Analog");
+  if (open==1){
+    $("#toggle2").text("Secort");
+    moveornot=!moveornot;
+      if(moveornot&&turn){
+      setTimeout(move,0);
+    	}
+    }
+  if (open==2){
+  	moveornot=false;
+  	$("#toggle2").text("Analog");
+    }
+	if(open>2) open=0;
+});
+
+function move(){
+if(turn){
+	if(moveornot) setTimeout(move,1000);
+  angle-=10/360*Math.PI;
+  }
+  else setTimeout(move,0);
+}
+/*function time(){
+ 	var y=Date.now();
+　for(var i=0;i<1e7;i++){
+     var x=Date.now();
+    if(x-y>=1000) break;
+  }
+}*/
+function init () {
+	renderer = new THREE.WebGLRenderer();
+	document.body.appendChild (renderer.domElement);
+	var width = window.innerWidth;
+	var height = window.innerHeight;
+	
+	renderer.setSize (width, height);
+	
+	renderer.setClearColor (0xffffff);
+	
+	scene = new THREE.Scene();
+	//var grid = new THREE.GridHelper(200,20, 'red', 'black');
+	//scene.add (grid);
+	var axes = new THREE.AxesHelper (5);
+	scene.add (axes);
+	
+	camera = new THREE.PerspectiveCamera (35, width/height, 1, 3000);
+	camera.position.y = 160;
+	camera.position.z = 400;
+	camera.lookAt (new THREE.Vector3(0,0,0));
+	
+	controls = new THREE.OrbitControls(camera, renderer.domElement);
+	
+	// build U-shape
+	ushape = new THREE.Group();
+	var mat = new THREE.MeshNormalMaterial();
+	var base = new THREE.Mesh (new THREE.BoxGeometry(5,45,5), mat);
+  var base2 = new THREE.Mesh (new THREE.BoxGeometry(5,5,5), mat);
+  var geometry = new THREE.ConeBufferGeometry( 5, 10, 64 );
+	var material = new THREE.MeshBasicMaterial( {color: 0xffa978,side:THREE.DoubleSide} );
+	var cone = new THREE.Mesh( geometry, material );
+	base.position.set (0,20,0);
+  base2.position.set (0,50,0);
+  cone.position.set (0,45,0);
+	ushape.add (base);	
+  scene.add (base2);
+  ushape.add( cone );
+  scene.add (ushape);
+	window.addEventListener('resize', onWindowResize, false);
+  var geometry = new THREE.CircleBufferGeometry( 50, 36 );
+	var material = new THREE.MeshBasicMaterial( { color: 0xd5ffa1 ,side:THREE.DoubleSide });
+	circle1 = new THREE.Mesh( geometry, material );
+	scene.add(circle1);
+}
+
+function onWindowResize() {
+  
+	var width = window.innerWidth;
+  var height = window.innerHeight;
+  camera.aspect = width / height;
+  camera.updateProjectionMatrix();
+  renderer.setSize(width, height);
+	
+}
+
+function animate() {
+	ushape.rotation.z=(angle);
+	requestAnimationFrame(animate);
+	render();
+if (turn){
+	//console.log ('angle: ' + angle);
+	//controls.update();
+ 	//angle -= clock.getDelta()*6/60;
+  
+ if(open==0){
+	angle-= Math.PI*2/60/60;
+ 	scene.remove(circle2);
+  scene.remove(circle3);
+ 	scene.add(ushape);
+	scene.add(circle1);
+	}
+  if(open==2){
+  angle-= Math.PI*2/60/60;
+  angle2= Math.PI*2;
+  if(angle2+angle<=0){
+  	angle=0;
+  }
+	scene.remove(ushape);
+  scene.remove(circle2);
+  var geometry = new THREE.CircleBufferGeometry(51,36,1.57,angle2+angle);
+	var material = new THREE.MeshBasicMaterial( { color: 0xffffff,side:THREE.DoubleSide } );
+	circle2 = new THREE.Mesh( geometry, material );
+  circle2.position.set(0,0,0.1);
+	scene.add(circle2);
+  scene.remove(circle3);
+  var geometry1 = new THREE.CircleBufferGeometry(51,36,1.57,angle2+angle);
+	var material1 = new THREE.MeshBasicMaterial( { color: 0xffffff,side:THREE.DoubleSide } );
+	circle3 = new THREE.Mesh( geometry1, material1 );
+  circle3.position.set(0,0,-0.1);
+	scene.add(circle3);
+	}
+  }
+}
+
+
+
+
+function render() {
+	renderer.render(scene, camera);
+	
+}
+</script>
+</body>
+
+</html>
+
